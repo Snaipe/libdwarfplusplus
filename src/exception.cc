@@ -26,7 +26,7 @@ namespace Dwarf {
         return dwarf::dwarf_errmsg(err_);
     }
 
-    const Unsigned Dwarf::Exception::errno() const throw() {
+    const Unsigned Dwarf::Exception::get_errno() const throw() {
         return dwarf::dwarf_errno(err_);
     }
 
