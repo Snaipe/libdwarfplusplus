@@ -18,11 +18,18 @@
  *
  */
 #include <libdwarf++/dwarf.hh>
+#include <libdwarf++/cu.hh>
+
+extern "C" {
+#include <fcntl.h>
+};
 
 namespace Dwarf {
 
     Debug::Debug(int fd, Dwarf::Unsigned access, Dwarf::Handler handler, Dwarf::Ptr errarg)
-            throw (InitException, NoDebugInformationException) {
+            throw (InitException, NoDebugInformationException)
+        : fd_(fd)
+    {
 
         dwarf::Dwarf_Error err;
         switch (dwarf::dwarf_init(fd, access, handler, errarg, &handle_, &err)) {
@@ -31,7 +38,12 @@ namespace Dwarf {
                 throw new InitException(err);
             case DW_DLV_NO_ENTRY:
                 throw new NoDebugInformationException();
+            case DW_DLV_OK:
+                break;
         }
+
+        begin_ = CUIterator::next(this);
+        end_   = CUIterator::end(this);
     }
 
     Debug::~Debug() {
@@ -44,5 +56,17 @@ namespace Dwarf {
         Error err;
         if (dwarf::dwarf_finish(handle_, &err) != DW_DLV_OK)
             throw new Exception(this, err);
+    }
+
+    CUIterator& Debug::begin() const {
+        return *begin_;
+    }
+
+    CUIterator& Debug::end() const {
+        return *end_;
+    }
+
+    int Debug::open_self() {
+        return open("/proc/self/exe", O_RDONLY);
     }
 };
