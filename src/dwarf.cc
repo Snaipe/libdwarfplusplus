@@ -20,9 +20,11 @@
 #include <libdwarf++/dwarf.hh>
 #include <libdwarf++/cu.hh>
 
+namespace posix {
 extern "C" {
 #include <fcntl.h>
 };
+}
 
 namespace Dwarf {
 
@@ -42,20 +44,17 @@ namespace Dwarf {
                 break;
         }
 
-        begin_ = CUIterator::next(this);
-        end_   = CUIterator::end(this);
     }
 
     Debug::~Debug() {
-        try {
-            close();
-        } catch (Exception& ex) { }
+        Error err;
+        dwarf::dwarf_finish(handle_, &err);
     }
 
     void Debug::close() throw (Exception) {
         Error err;
         if (dwarf::dwarf_finish(handle_, &err) != DW_DLV_OK)
-            throw new Exception(this, err);
+            throw new Exception(shared_from_this(), err);
     }
 
     CUIterator& Debug::begin() const {
@@ -66,7 +65,21 @@ namespace Dwarf {
         return *end_;
     }
 
-    int Debug::open_self() {
-        return open("/proc/self/exe", O_RDONLY);
+    Debug::operator std::shared_ptr<Debug>() {
+        return shared_from_this();
+    }
+
+    std::shared_ptr<Debug> Debug::open(const char *path) {
+        int fd = posix::open(path, O_RDONLY);
+        if (fd == -1)
+            return nullptr;
+        std::shared_ptr<Debug> ref(new Debug(fd));
+        ref->begin_ = CUIterator::next(ref);
+        ref->end_   = CUIterator::end(ref);
+        return ref;
+    }
+
+    std::shared_ptr<Debug> Debug::self() {
+        return open("/proc/self/exe");
     }
 };

@@ -28,23 +28,24 @@
 namespace Dwarf {
 
     template <typename T> struct TypeKind {};
-    template <> struct TypeKind<Error> { enum {Kind = DW_DLA_ERROR}; };
+    template <> struct TypeKind<dwarf::Dwarf_Error> { enum {Kind = DW_DLA_ERROR}; };
+    template <> struct TypeKind<dwarf::Dwarf_Die >  { enum {Kind = DW_DLA_DIE}; };
 
     class CUIterator;
     class CompilationUnit;
 
-    class Debug final {
+    class Debug final : public std::enable_shared_from_this<Debug> {
     public:
-        Debug(int fd = open_self(), Unsigned access = DW_DLC_READ, Handler = nullptr, Ptr errarg = nullptr)
-                throw(InitException, NoDebugInformationException);
 
-        ~Debug();
+        virtual ~Debug();
 
         template <typename T>
         void dealloc(T& val);
 
         CUIterator& begin() const;
         CUIterator& end() const;
+
+        operator std::shared_ptr<Debug>();
 
         bool operator==(const Debug &other) const {
             return fd_ == other.fd_;
@@ -60,8 +61,12 @@ namespace Dwarf {
             return handle_;
         }
 
+        static std::shared_ptr<Debug> open(const char *path);
+        static std::shared_ptr<Debug> self();
+
     private:
-        static int open_self();
+        Debug(int fd, Unsigned access = DW_DLC_READ, Handler = nullptr, Ptr errarg = nullptr)
+            throw(InitException, NoDebugInformationException);
 
         int fd_;
         dwarf::Dwarf_Debug handle_;

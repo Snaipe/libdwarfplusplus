@@ -31,10 +31,23 @@ namespace Dwarf {
     }
 
     Exception::~Exception() throw() {
-        dbg_->dealloc(err_);
+        if (auto dbg = dbg_.lock())
+            dbg->dealloc(err_);
     }
 
     InitException::~InitException() throw() {
         std::free(err_);
     }
+
+    DebugClosedException::~DebugClosedException() {
+    }
+
+    const char *DebugClosedException::what() const throw() {
+        return "Dwarf_Debug has already been closed";
+    }
+
+    const Unsigned DebugClosedException::get_errno() const throw() {
+        return 0;
+    }
+
 };

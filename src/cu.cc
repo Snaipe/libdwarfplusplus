@@ -23,8 +23,8 @@ namespace Dwarf {
 
     // CompilationUnit
 
-    CompilationUnit::CompilationUnit(Debug* dbg,
-            dwarf::Dwarf_Die die,
+    CompilationUnit::CompilationUnit(std::weak_ptr<Debug> dbg,
+            std::shared_ptr<Dwarf::Die> die,
             Unsigned header_len,
             Half version_stamp,
             Unsigned abbrev_offset,
@@ -40,7 +40,11 @@ namespace Dwarf {
     {}
 
     bool CompilationUnit::operator==(const CompilationUnit &other) const {
-        return dbg_ == other.dbg_ && header_ == other.header_;
+        std::shared_ptr<Debug> dbg = dbg_.lock();
+        std::shared_ptr<Debug> odbg = other.dbg_.lock();
+        if (!dbg || !odbg)
+            throw new DebugClosedException();
+        return *dbg == *odbg && header_ == other.header_;
     }
 
     bool CompilationUnit::operator!=(const CompilationUnit &other) const {
@@ -51,13 +55,13 @@ namespace Dwarf {
         return header_ != 0;
     }
 
-    dwarf::Dwarf_Die CompilationUnit::get_die() const {
+    std::shared_ptr<Die> CompilationUnit::get_die() const {
         return die_;
     }
 
     // CUIterator
 
-    CUIterator::CUIterator(Debug* dbg, std::shared_ptr<CompilationUnit>& value) throw (Exception)
+    CUIterator::CUIterator(std::shared_ptr<Debug>& dbg, std::shared_ptr<CompilationUnit>& value) throw (Exception)
             : dbg_(dbg)
             , next_(std::make_shared<std::unique_ptr<CUIterator>>(nullptr))
             , value_(value)
@@ -95,24 +99,27 @@ namespace Dwarf {
     CUIterator& CUIterator::operator++() {
         if (!end_) {
             if (!*next_) {
-                *next_ = next(dbg_);
+                std::shared_ptr<Debug> dbg = dbg_.lock();
+                if (!dbg)
+                    throw new DebugClosedException();
+                *next_ = next(dbg);
             }
             *this = **next_;
         }
         return *this;
     }
 
-    std::unique_ptr<CUIterator> CUIterator::next(Debug* dbg) {
+    std::unique_ptr<CUIterator> CUIterator::next(std::shared_ptr<Debug> dbg) {
         std::shared_ptr<CompilationUnit> cu = next_cu(dbg);
         return std::make_unique<CUIterator>(dbg, cu);
     }
 
-    std::unique_ptr<CUIterator> CUIterator::end(Debug* dbg) {
+    std::unique_ptr<CUIterator> CUIterator::end(std::shared_ptr<Debug> dbg) {
         std::shared_ptr<CompilationUnit> cu = nullptr;
         return std::make_unique<CUIterator>(dbg, cu);
     }
 
-    std::shared_ptr<CompilationUnit> CUIterator::next_cu(Debug* dbg) {
+    std::shared_ptr<CompilationUnit> CUIterator::next_cu(std::shared_ptr<Debug> dbg) {
         Error err;
         Unsigned header_len, abbrev_offset, header;
         Half version_stamp, address_size;
@@ -140,7 +147,9 @@ namespace Dwarf {
                 throw new Exception(dbg, err);
             default: break;
         }
+        std::weak_ptr<Debug> wk_dbg = dbg;
+        std::shared_ptr<Die> d = std::make_shared<Die>(wk_dbg, die);
 
-        return std::make_shared<CompilationUnit>(dbg, die, header_len, version_stamp, abbrev_offset, address_size, header);
+        return std::make_shared<CompilationUnit>(dbg, d, header_len, version_stamp, abbrev_offset, address_size, header);
     }
 }

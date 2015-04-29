@@ -21,6 +21,7 @@
 # define LIBDWARFPP_EXCEPTION_H
 
 # include <exception>
+# include <memory>
 # include "cdwarf"
 
 namespace Dwarf {
@@ -31,7 +32,7 @@ namespace Dwarf {
 
     class Exception : public std::exception {
     public:
-        Exception(Debug* dbg, Error& err) : err_(err), dbg_(dbg) {};
+        Exception(std::shared_ptr<Debug> dbg, Error& err) : err_(err), dbg_(dbg) {};
         virtual ~Exception() throw();
 
         virtual const char *what() const throw() override;
@@ -42,7 +43,7 @@ namespace Dwarf {
         Exception() {};
 
         Error err_;
-        Debug* dbg_;
+        std::weak_ptr<Debug> dbg_;
     };
 
     class InitException : public Exception {
@@ -62,6 +63,15 @@ namespace Dwarf {
         virtual const Unsigned get_errno() const throw() override {
             return 0;
         }
+    };
+
+    class DebugClosedException : public Exception {
+    public:
+        DebugClosedException() : Exception() {}
+        ~DebugClosedException();
+
+        virtual const char *what() const throw() override;
+        virtual const Unsigned get_errno() const throw() override;
     };
 
 }
