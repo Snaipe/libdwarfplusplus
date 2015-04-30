@@ -18,10 +18,15 @@ namespace Dwarf {
         }
     }
 
-    void Die::traverse(std::function<void(Die &)> func) {
-        func(*this);
-        Die& c = *child();
-        c.traverse(func);
+    void Die::traverse(std::function<TraversalResult(Die &)> func) {
+        switch (func(*this)) {
+            case Die::TraversalResult::SKIP:  break;
+            case Die::TraversalResult::BREAK: return;
+
+            default:
+            case Die::TraversalResult::TRAVERSE:
+                child()->traverse(func);
+        }
         sibling()->traverse(func);
     }
 
@@ -49,7 +54,7 @@ namespace Dwarf {
                 sibling_ = std::make_shared<EmptyDie>();
                 return;
             case DW_DLV_ERROR:
-                throw new Exception(dbg, err);
+                throw Exception(dbg, err);
             default: break;
         }
         sibling_ = std::make_shared<Die>(dbg_, sibling);
@@ -69,7 +74,7 @@ namespace Dwarf {
                 child_ = std::make_shared<EmptyDie>();
                 return;
             case DW_DLV_ERROR:
-                throw new Exception(dbg, err);
+                throw Exception(dbg, err);
             default: break;
         }
         child_ = std::make_shared<Die>(dbg_, child);

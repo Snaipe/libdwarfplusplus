@@ -43,7 +43,7 @@ namespace Dwarf {
         std::shared_ptr<Debug> dbg = dbg_.lock();
         std::shared_ptr<Debug> odbg = other.dbg_.lock();
         if (!dbg || !odbg)
-            throw new DebugClosedException();
+            throw DebugClosedException();
         return *dbg == *odbg && header_ == other.header_;
     }
 
@@ -101,7 +101,7 @@ namespace Dwarf {
             if (!*next_) {
                 std::shared_ptr<Debug> dbg = dbg_.lock();
                 if (!dbg)
-                    throw new DebugClosedException();
+                    throw DebugClosedException();
                 *next_ = next(dbg);
             }
             *this = **next_;
@@ -135,7 +135,7 @@ namespace Dwarf {
             case DW_DLV_NO_ENTRY:
                 return nullptr;
             case DW_DLV_ERROR:
-                throw new Exception(dbg, err);
+                throw Exception(dbg, err);
             default: break;
         }
 
@@ -144,7 +144,7 @@ namespace Dwarf {
             case DW_DLV_NO_ENTRY:
                 return nullptr;
             case DW_DLV_ERROR:
-                throw new Exception(dbg, err);
+                throw Exception(dbg, err);
             default: break;
         }
         std::weak_ptr<Debug> wk_dbg = dbg;

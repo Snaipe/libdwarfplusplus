@@ -32,7 +32,7 @@ namespace Dwarf {
 
     class Exception : public std::exception {
     public:
-        Exception(std::shared_ptr<Debug> dbg, Error& err) : err_(err), dbg_(dbg) {};
+        Exception(std::weak_ptr<Debug> dbg, Error& err) : err_(err), dbg_(dbg) {};
         virtual ~Exception() throw();
 
         virtual const char *what() const throw() override;

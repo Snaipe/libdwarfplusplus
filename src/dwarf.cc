@@ -37,9 +37,9 @@ namespace Dwarf {
         switch (dwarf::dwarf_init(fd, access, handler, errarg, &handle_, &err)) {
             default:
             case DW_DLV_ERROR:
-                throw new InitException(err);
+                throw InitException(err);
             case DW_DLV_NO_ENTRY:
-                throw new NoDebugInformationException();
+                throw NoDebugInformationException();
             case DW_DLV_OK:
                 break;
         }
@@ -54,7 +54,7 @@ namespace Dwarf {
     void Debug::close() throw (Exception) {
         Error err;
         if (dwarf::dwarf_finish(handle_, &err) != DW_DLV_OK)
-            throw new Exception(shared_from_this(), err);
+            throw Exception(shared_from_this(), err);
     }
 
     CUIterator& Debug::begin() const {
