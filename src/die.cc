@@ -7,6 +7,7 @@ namespace Dwarf {
         , die_(die)
         , sibling_()
         , child_()
+        , name_(new Dwarf::string(dbg))
     {}
 
     Die::Die() {}
@@ -89,6 +90,21 @@ namespace Dwarf {
             default: break;
         }
         return Tag(tag);
+    }
+
+    const char* Die::get_name() const throw(Exception) {
+        if (name_->str)
+            return name_->str;
+
+        Error err;
+        switch (dwarf::dwarf_diename(die_, &name_->str, &err)) {
+            case DW_DLV_ERROR:
+                throw Exception(dbg_, err);
+            case DW_DLV_NO_ENTRY:
+                return nullptr;
+            default: break;
+        }
+        return name_->str;
     }
 
 }

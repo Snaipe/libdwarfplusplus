@@ -25,6 +25,7 @@ namespace Dwarf {
         virtual std::shared_ptr<Die> child();
 
         const Tag get_tag() const throw(Exception);
+        const char* get_name() const throw(Exception);
 
         const dwarf::Dwarf_Die& get_handle() const {
             return die_;
@@ -37,6 +38,7 @@ namespace Dwarf {
         void init_sibling();
         void init_child();
 
+        std::unique_ptr<Dwarf::string> name_;
         std::weak_ptr<Debug> dbg_;
         dwarf::Dwarf_Die die_;
         std::shared_ptr<Die> sibling_, child_;

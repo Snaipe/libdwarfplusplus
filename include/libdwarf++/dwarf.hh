@@ -27,6 +27,18 @@
 
 namespace Dwarf {
 
+    class Debug;
+
+    struct string {
+        string(std::weak_ptr<Debug> dbg);
+        string(std::weak_ptr<Debug> dbg, char* str);
+        ~string();
+
+        char* str;
+    private:
+        std::weak_ptr<Debug> dbg_;
+    };
+
     template <typename T> struct TypeKind {};
     template <> struct TypeKind<dwarf::Dwarf_Error> { enum {Kind = DW_DLA_ERROR}; };
     template <> struct TypeKind<dwarf::Dwarf_Die >  { enum {Kind = DW_DLA_DIE}; };

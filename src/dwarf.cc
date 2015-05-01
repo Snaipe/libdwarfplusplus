@@ -28,6 +28,19 @@ extern "C" {
 
 namespace Dwarf {
 
+    // string
+
+    string::string(std::weak_ptr<Debug> dbg) : dbg_(dbg), str(nullptr) {};
+    string::string(std::weak_ptr<Debug> dbg, char* str) : dbg_(dbg), str(str) {};
+
+    string::~string() {
+        std::shared_ptr<Debug> dbg = dbg_.lock();
+        if (dbg && str)
+            dwarf::dwarf_dealloc(dbg->get_handle(), str, DW_DLA_STRING);
+    }
+
+    // debug
+
     Debug::Debug(int fd, Dwarf::Unsigned access, Dwarf::Handler handler, Dwarf::Ptr errarg)
             throw (InitException, NoDebugInformationException)
         : fd_(fd)
