@@ -24,16 +24,7 @@ namespace Dwarf {
         virtual std::shared_ptr<Die> sibling();
         virtual std::shared_ptr<Die> child();
 
-        const Tag get_tag() const throw(Exception) {
-            Error err;
-            Half tag;
-            switch (dwarf::dwarf_tag(die_, &tag, &err)) {
-                case DW_DLV_ERROR:
-                    throw Exception(dbg_, err);
-                default: break;
-            }
-            return Tag(tag);
-        }
+        const Tag get_tag() const throw(Exception);
 
         const dwarf::Dwarf_Die& get_handle() const {
             return die_;

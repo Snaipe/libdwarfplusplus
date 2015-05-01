@@ -80,4 +80,15 @@ namespace Dwarf {
         child_ = std::make_shared<Die>(dbg_, child);
     }
 
+    const Tag Die::get_tag() const throw(Exception) {
+        Error err;
+        Half tag;
+        switch (dwarf::dwarf_tag(die_, &tag, &err)) {
+            case DW_DLV_ERROR:
+                throw Exception(dbg_, err);
+            default: break;
+        }
+        return Tag(tag);
+    }
+
 }
