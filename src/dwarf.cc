@@ -36,7 +36,7 @@ namespace Dwarf {
     string::~string() {
         std::shared_ptr<Debug> dbg = dbg_.lock();
         if (dbg && str)
-            dwarf::dwarf_dealloc(dbg->get_handle(), str, DW_DLA_STRING);
+            dbg->dealloc(str);
     }
 
     // debug

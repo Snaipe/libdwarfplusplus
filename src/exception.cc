@@ -26,7 +26,7 @@ namespace Dwarf {
         return dwarf::dwarf_errmsg(err_);
     }
 
-    const Unsigned Dwarf::Exception::get_errno() const throw() {
+    Unsigned Dwarf::Exception::get_errno() const throw() {
         return dwarf::dwarf_errno(err_);
     }
 
@@ -46,7 +46,7 @@ namespace Dwarf {
         return "Dwarf_Debug has already been closed";
     }
 
-    const Unsigned DebugClosedException::get_errno() const throw() {
+    Unsigned DebugClosedException::get_errno() const throw() {
         return 0;
     }
 

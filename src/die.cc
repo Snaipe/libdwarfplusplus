@@ -19,16 +19,16 @@ namespace Dwarf {
         }
     }
 
-    void Die::traverse(std::function<TraversalResult(Die &)> func) {
-        switch (func(*this)) {
+    void Die::traverse(std::function<TraversalResult(Die&, void*)> func, void* data) {
+        switch (func(*this, data)) {
             case Die::TraversalResult::SKIP:  break;
             case Die::TraversalResult::BREAK: return;
 
             default:
             case Die::TraversalResult::TRAVERSE:
-                child()->traverse(func);
+                child()->traverse(func, data);
         }
-        sibling()->traverse(func);
+        sibling()->traverse(func, data);
     }
 
     std::shared_ptr<Die> Die::sibling() {
@@ -107,4 +107,34 @@ namespace Dwarf {
         return name_->str;
     }
 
+    std::unique_ptr<const Attribute> Die::get_attribute(Dwarf::Half attr) const {
+        Dwarf::Error err;
+        dwarf::Dwarf_Attribute result;
+        switch (dwarf::dwarf_attr(die_, attr, &result, &err)) {
+            case DW_DLV_NO_ENTRY: return nullptr;
+            case DW_DLV_ERROR: throw Exception(dbg_, err);
+            default: break;
+        }
+        return std::make_unique<Attribute>(dbg_, result);
+    }
+
+    Attribute::Attribute(std::weak_ptr<Debug> dbg, dwarf::Dwarf_Attribute attr)
+        : dbg_(dbg)
+        , attr_(attr)
+    {}
+
+    Attribute::~Attribute() {
+        if (std::shared_ptr<Debug> dbg = dbg_.lock()) {
+            dbg->dealloc(attr_);
+        }
+    }
+
+    Dwarf::Half Attribute::form() const {
+        Dwarf::Half res;
+        Dwarf::Error err;
+        switch (dwarf::dwarf_whatform(attr_, &res, &err)) {
+            case DW_DLV_ERROR: throw Exception(dbg_, err);
+            default: return res;
+        }
+    }
 }

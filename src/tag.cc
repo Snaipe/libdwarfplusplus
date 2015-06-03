@@ -10,4 +10,8 @@ namespace Dwarf {
         return name;
     }
 
+    unsigned int Tag::get_id() const {
+        return tag_;
+    }
+
 }
