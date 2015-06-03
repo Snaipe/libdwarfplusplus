@@ -42,8 +42,8 @@ namespace Dwarf {
         std::shared_ptr<Die> get_die() const;
 
     private:
-        std::shared_ptr<Dwarf::Die> die_;
         std::weak_ptr<Debug> dbg_;
+        std::shared_ptr<Dwarf::Die> die_;
         Unsigned header_len_;
         Half version_stamp_;
         Unsigned abbrev_offset_;
@@ -70,8 +70,8 @@ namespace Dwarf {
     private:
         static std::shared_ptr<CompilationUnit> next_cu(std::shared_ptr<Debug> dbg);
 
-        bool end_;
         std::weak_ptr<Debug> dbg_;
+        bool end_;
         std::shared_ptr<std::unique_ptr<CUIterator>> next_;
         std::shared_ptr<CompilationUnit> value_;
     };

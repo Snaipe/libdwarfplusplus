@@ -34,14 +34,17 @@ namespace Dwarf {
         string(std::weak_ptr<Debug> dbg, char* str);
         ~string();
 
-        char* str;
     private:
         std::weak_ptr<Debug> dbg_;
+    public:
+        char* str;
     };
 
     template <typename T> struct TypeKind {};
-    template <> struct TypeKind<dwarf::Dwarf_Error> { enum {Kind = DW_DLA_ERROR}; };
-    template <> struct TypeKind<dwarf::Dwarf_Die >  { enum {Kind = DW_DLA_DIE}; };
+    template <> struct TypeKind<dwarf::Dwarf_Error>     { enum {Kind = DW_DLA_ERROR}; };
+    template <> struct TypeKind<dwarf::Dwarf_Die >      { enum {Kind = DW_DLA_DIE}; };
+    template <> struct TypeKind<dwarf::Dwarf_Attribute> { enum {Kind = DW_DLA_ATTR}; };
+    template <> struct TypeKind<char *>                 { enum {Kind = DW_DLA_STRING}; };
 
     class CUIterator;
     class CompilationUnit;

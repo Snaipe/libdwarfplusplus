@@ -9,6 +9,7 @@ namespace Dwarf {
     public:
         Tag(unsigned int tag);
         const char* get_name() const;
+        unsigned int get_id() const;
     private:
         unsigned int tag_;
     };

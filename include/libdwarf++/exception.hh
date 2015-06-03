@@ -36,7 +36,7 @@ namespace Dwarf {
         virtual ~Exception() throw();
 
         virtual const char *what() const throw() override;
-        virtual const Unsigned get_errno() const throw();
+        virtual Unsigned get_errno() const throw();
 
     protected:
         Exception(Error& err) : err_(err) {};
@@ -60,7 +60,7 @@ namespace Dwarf {
             return "The object does not contain DWARF debugging information";
         }
 
-        virtual const Unsigned get_errno() const throw() override {
+        virtual Unsigned get_errno() const throw() override {
             return 0;
         }
     };
@@ -71,7 +71,7 @@ namespace Dwarf {
         ~DebugClosedException();
 
         virtual const char *what() const throw() override;
-        virtual const Unsigned get_errno() const throw() override;
+        virtual Unsigned get_errno() const throw() override;
     };
 
 }
