@@ -76,6 +76,8 @@ namespace Dwarf {
             return die_;
         }
 
+        Dwarf::Off get_offset() const throw(Exception);
+
         std::unique_ptr<const Attribute> get_attribute(Dwarf::Half attr) const;
 
     protected:
@@ -89,6 +91,7 @@ namespace Dwarf {
         dwarf::Dwarf_Die die_;
         std::shared_ptr<Die> sibling_, child_;
         std::unique_ptr<Dwarf::string> name_;
+        std::unique_ptr<Dwarf::Off> offset_;
     };
 
     class EmptyDie : public Die {

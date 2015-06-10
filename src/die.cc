@@ -8,6 +8,7 @@ namespace Dwarf {
         , sibling_()
         , child_()
         , name_(new Dwarf::string(dbg))
+        , offset_(new unsigned long long int())
     {}
 
     Die::Die() {}
@@ -105,6 +106,19 @@ namespace Dwarf {
             default: break;
         }
         return name_->str;
+    }
+
+    Dwarf::Off Die::get_offset() const throw(Exception) {
+        if (*offset_ > 0)
+            return *offset_;
+
+        Error err;
+        switch (dwarf::dwarf_dieoffset(die_, &*offset_, &err)) {
+            case DW_DLV_ERROR:
+                throw Exception(dbg_, err);
+            default: break;
+        }
+        return *offset_;
     }
 
     std::unique_ptr<const Attribute> Die::get_attribute(Dwarf::Half attr) const {

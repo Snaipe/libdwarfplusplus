@@ -95,4 +95,15 @@ namespace Dwarf {
     std::shared_ptr<Debug> Debug::self() {
         return open("/proc/self/exe");
     }
+
+    std::shared_ptr<Die> Debug::offdie(Dwarf::Off offset) const {
+        dwarf::Dwarf_Die die;
+        Dwarf::Error err;
+        switch (dwarf::dwarf_offdie(handle_, offset, &die, &err)) {
+            case DW_DLV_NO_ENTRY: return nullptr;
+            case DW_DLV_ERROR: throw Exception(shared_from_this(), err);
+            default: break;
+        }
+        return new Die(shared_from_this(), die);
+    }
 };

@@ -76,6 +76,8 @@ namespace Dwarf {
             return handle_;
         }
 
+        std::shared_ptr<Die> offdie(Dwarf::Off offset) const;
+
         static std::shared_ptr<Debug> open(const char *path);
         static std::shared_ptr<Debug> self();
 
