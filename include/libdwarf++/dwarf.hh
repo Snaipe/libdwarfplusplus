@@ -60,6 +60,8 @@ namespace Dwarf {
 
         CUIterator& begin() const;
         CUIterator& end() const;
+        CUIterator& cbegin() const;
+        CUIterator& cend() const;
 
         operator std::shared_ptr<const Debug>() const;
 

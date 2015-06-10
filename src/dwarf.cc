@@ -78,6 +78,14 @@ namespace Dwarf {
         return *end_;
     }
 
+    CUIterator& Debug::cbegin() const {
+        return *begin_;
+    }
+
+    CUIterator& Debug::cend() const {
+        return *end_;
+    }
+
     Debug::operator std::shared_ptr<const Debug>() const {
         return shared_from_this();
     }
