@@ -2,7 +2,7 @@
 
 namespace Dwarf {
 
-    Die::Die(std::weak_ptr<Debug> dbg, dwarf::Dwarf_Die& die)
+    Die::Die(std::weak_ptr<const Debug> dbg, dwarf::Dwarf_Die& die)
         : dbg_(dbg)
         , die_(die)
         , sibling_()
@@ -14,7 +14,7 @@ namespace Dwarf {
     Die::Die() {}
 
     Die::~Die() {
-        std::shared_ptr<Debug> dbg = dbg_.lock();
+        std::shared_ptr<const Debug> dbg = dbg_.lock();
         if (dbg) {
             dbg->dealloc(die_);
         }
@@ -46,7 +46,7 @@ namespace Dwarf {
         if (sibling_)
             return;
 
-        std::shared_ptr<Debug> dbg = dbg_.lock();
+        std::shared_ptr<const Debug> dbg = dbg_.lock();
         if (!dbg)
             throw new DebugClosedException();
         Error err;
@@ -66,7 +66,7 @@ namespace Dwarf {
         if (child_)
             return;
 
-        std::shared_ptr<Debug> dbg = dbg_.lock();
+        std::shared_ptr<const Debug> dbg = dbg_.lock();
         if (!dbg)
             throw new DebugClosedException();
         Error err;
@@ -132,13 +132,13 @@ namespace Dwarf {
         return std::make_unique<Attribute>(dbg_, result);
     }
 
-    Attribute::Attribute(std::weak_ptr<Debug> dbg, dwarf::Dwarf_Attribute attr)
+    Attribute::Attribute(std::weak_ptr<const Debug> dbg, dwarf::Dwarf_Attribute attr)
         : dbg_(dbg)
         , attr_(attr)
     {}
 
     Attribute::~Attribute() {
-        if (std::shared_ptr<Debug> dbg = dbg_.lock()) {
+        if (std::shared_ptr<const Debug> dbg = dbg_.lock()) {
             dbg->dealloc(attr_);
         }
     }

@@ -23,7 +23,7 @@ namespace Dwarf {
 
     // CompilationUnit
 
-    CompilationUnit::CompilationUnit(std::weak_ptr<Debug> dbg,
+    CompilationUnit::CompilationUnit(std::weak_ptr<const Debug> dbg,
             std::shared_ptr<Dwarf::Die> die,
             Unsigned header_len,
             Half version_stamp,
@@ -40,8 +40,8 @@ namespace Dwarf {
     {}
 
     bool CompilationUnit::operator==(const CompilationUnit &other) const {
-        std::shared_ptr<Debug> dbg = dbg_.lock();
-        std::shared_ptr<Debug> odbg = other.dbg_.lock();
+        std::shared_ptr<const Debug> dbg = dbg_.lock();
+        std::shared_ptr<const Debug> odbg = other.dbg_.lock();
         if (!dbg || !odbg)
             throw DebugClosedException();
         return *dbg == *odbg && header_ == other.header_;
@@ -61,7 +61,7 @@ namespace Dwarf {
 
     // CUIterator
 
-    CUIterator::CUIterator(std::shared_ptr<Debug>& dbg, std::shared_ptr<CompilationUnit>& value) throw (Exception)
+    CUIterator::CUIterator(std::shared_ptr<const Debug>& dbg, std::shared_ptr<CompilationUnit>& value) throw (Exception)
             : dbg_(dbg)
             , next_(std::make_shared<std::unique_ptr<CUIterator>>(nullptr))
             , value_(value)
@@ -99,7 +99,7 @@ namespace Dwarf {
     CUIterator& CUIterator::operator++() {
         if (!end_) {
             if (!*next_) {
-                std::shared_ptr<Debug> dbg = dbg_.lock();
+                std::shared_ptr<const Debug> dbg = dbg_.lock();
                 if (!dbg)
                     throw DebugClosedException();
                 *next_ = next(dbg);
@@ -109,17 +109,17 @@ namespace Dwarf {
         return *this;
     }
 
-    std::unique_ptr<CUIterator> CUIterator::next(std::shared_ptr<Debug> dbg) {
+    std::unique_ptr<CUIterator> CUIterator::next(std::shared_ptr<const Debug> dbg) {
         std::shared_ptr<CompilationUnit> cu = next_cu(dbg);
         return std::make_unique<CUIterator>(dbg, cu);
     }
 
-    std::unique_ptr<CUIterator> CUIterator::end(std::shared_ptr<Debug> dbg) {
+    std::unique_ptr<CUIterator> CUIterator::end(std::shared_ptr<const Debug> dbg) {
         std::shared_ptr<CompilationUnit> cu = nullptr;
         return std::make_unique<CUIterator>(dbg, cu);
     }
 
-    std::shared_ptr<CompilationUnit> CUIterator::next_cu(std::shared_ptr<Debug> dbg) {
+    std::shared_ptr<CompilationUnit> CUIterator::next_cu(std::shared_ptr<const Debug> dbg) {
         Error err;
         Unsigned header_len, abbrev_offset, header;
         Half version_stamp, address_size;
@@ -147,7 +147,7 @@ namespace Dwarf {
                 throw Exception(dbg, err);
             default: break;
         }
-        std::weak_ptr<Debug> wk_dbg = dbg;
+        std::weak_ptr<const Debug> wk_dbg = dbg;
         std::shared_ptr<Die> d = std::make_shared<Die>(wk_dbg, die);
 
         return std::make_shared<CompilationUnit>(dbg, d, header_len, version_stamp, abbrev_offset, address_size, header);

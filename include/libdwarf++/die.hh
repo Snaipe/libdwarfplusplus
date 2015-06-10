@@ -10,7 +10,7 @@ namespace Dwarf {
 
     class Attribute final {
     public:
-        Attribute(std::weak_ptr<Debug> dbg, dwarf::Dwarf_Attribute attr);
+        Attribute(std::weak_ptr<const Debug> dbg, dwarf::Dwarf_Attribute attr);
         ~Attribute();
 
         Dwarf::Half form() const;
@@ -47,7 +47,7 @@ namespace Dwarf {
             return result;
         }
     private:
-        std::weak_ptr<Debug> dbg_;
+        std::weak_ptr<const Debug> dbg_;
         dwarf::Dwarf_Attribute attr_;
     };
 
@@ -61,7 +61,7 @@ namespace Dwarf {
 
         using TraversalFunction = std::function<TraversalResult(Die&, void*)>;
 
-        Die(std::weak_ptr<Debug> dbg, dwarf::Dwarf_Die& die);
+        Die(std::weak_ptr<const Debug> dbg, dwarf::Dwarf_Die& die);
         Die(const Die& other) = delete;
         ~Die();
 
@@ -87,7 +87,7 @@ namespace Dwarf {
         void init_sibling();
         void init_child();
 
-        std::weak_ptr<Debug> dbg_;
+        std::weak_ptr<const Debug> dbg_;
         dwarf::Dwarf_Die die_;
         std::shared_ptr<Die> sibling_, child_;
         std::unique_ptr<Dwarf::string> name_;

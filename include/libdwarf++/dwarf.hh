@@ -30,12 +30,12 @@ namespace Dwarf {
     class Debug;
 
     struct string {
-        string(std::weak_ptr<Debug> dbg);
-        string(std::weak_ptr<Debug> dbg, char* str);
+        string(std::weak_ptr<const Debug> dbg);
+        string(std::weak_ptr<const Debug> dbg, char* str);
         ~string();
 
     private:
-        std::weak_ptr<Debug> dbg_;
+        std::weak_ptr<const Debug> dbg_;
     public:
         char* str;
     };
@@ -48,6 +48,7 @@ namespace Dwarf {
 
     class CUIterator;
     class CompilationUnit;
+    class Die;
 
     class Debug final : public std::enable_shared_from_this<Debug> {
     public:
@@ -55,12 +56,12 @@ namespace Dwarf {
         virtual ~Debug();
 
         template <typename T>
-        void dealloc(T& val);
+        void dealloc(T& val) const;
 
         CUIterator& begin() const;
         CUIterator& end() const;
 
-        operator std::shared_ptr<Debug>();
+        operator std::shared_ptr<const Debug>() const;
 
         bool operator==(const Debug &other) const {
             return fd_ == other.fd_;
@@ -70,7 +71,7 @@ namespace Dwarf {
             return !(*this == other);
         }
 
-        void close() throw (Exception);
+        void close() const throw (Exception);
 
         const dwarf::Dwarf_Debug& get_handle() const {
             return handle_;
@@ -78,8 +79,8 @@ namespace Dwarf {
 
         std::shared_ptr<Die> offdie(Dwarf::Off offset) const;
 
-        static std::shared_ptr<Debug> open(const char *path);
-        static std::shared_ptr<Debug> self();
+        static std::shared_ptr<const Debug> open(const char *path);
+        static std::shared_ptr<const Debug> self();
 
     private:
         Debug(int fd, Unsigned access = DW_DLC_READ, Handler = nullptr, Ptr errarg = nullptr)

@@ -28,7 +28,7 @@ namespace Dwarf {
 
     class CompilationUnit {
     public:
-        CompilationUnit(std::weak_ptr<Debug> dbg,
+        CompilationUnit(std::weak_ptr<const Debug> dbg,
                         std::shared_ptr<Dwarf::Die> die,
                         Unsigned header_len = 0,
                         Half version_stamp = 0,
@@ -42,7 +42,7 @@ namespace Dwarf {
         std::shared_ptr<Die> get_die() const;
 
     private:
-        std::weak_ptr<Debug> dbg_;
+        std::weak_ptr<const Debug> dbg_;
         std::shared_ptr<Dwarf::Die> die_;
         Unsigned header_len_;
         Half version_stamp_;
@@ -55,7 +55,7 @@ namespace Dwarf {
 
     class CUIterator : public std::iterator<std::forward_iterator_tag, const CompilationUnit> {
     public:
-        CUIterator(std::shared_ptr<Debug>& dbg, std::shared_ptr<CompilationUnit>& value) throw (Exception);
+        CUIterator(std::shared_ptr<const Debug>& dbg, std::shared_ptr<CompilationUnit>& value) throw (Exception);
         CUIterator(const CUIterator& other);
 
         const CompilationUnit& operator*() const;
@@ -64,13 +64,13 @@ namespace Dwarf {
         CUIterator& operator=(const CUIterator& cu);
         CUIterator& operator++();
 
-        static std::unique_ptr<CUIterator> next(std::shared_ptr<Debug> dbg);
-        static std::unique_ptr<CUIterator> end(std::shared_ptr<Debug> dbg);
+        static std::unique_ptr<CUIterator> next(std::shared_ptr<const Debug> dbg);
+        static std::unique_ptr<CUIterator> end(std::shared_ptr<const Debug> dbg);
 
     private:
-        static std::shared_ptr<CompilationUnit> next_cu(std::shared_ptr<Debug> dbg);
+        static std::shared_ptr<CompilationUnit> next_cu(std::shared_ptr<const Debug> dbg);
 
-        std::weak_ptr<Debug> dbg_;
+        std::weak_ptr<const Debug> dbg_;
         bool end_;
         std::shared_ptr<std::unique_ptr<CUIterator>> next_;
         std::shared_ptr<CompilationUnit> value_;

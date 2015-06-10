@@ -25,7 +25,7 @@
 namespace Dwarf {
 
     template <typename T>
-    void Debug::dealloc(T& val) {
+    void Debug::dealloc(T& val) const {
         dwarf::dwarf_dealloc(handle_, val, TypeKind<T>::Kind);
     }
 

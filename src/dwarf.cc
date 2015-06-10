@@ -30,11 +30,11 @@ namespace Dwarf {
 
     // string
 
-    string::string(std::weak_ptr<Debug> dbg) : dbg_(dbg), str(nullptr) {};
-    string::string(std::weak_ptr<Debug> dbg, char* str) : dbg_(dbg), str(str) {};
+    string::string(std::weak_ptr<const Debug> dbg) : dbg_(dbg), str(nullptr) {};
+    string::string(std::weak_ptr<const Debug> dbg, char* str) : dbg_(dbg), str(str) {};
 
     string::~string() {
-        std::shared_ptr<Debug> dbg = dbg_.lock();
+        std::shared_ptr<const Debug> dbg = dbg_.lock();
         if (dbg && str)
             dbg->dealloc(str);
     }
@@ -64,7 +64,7 @@ namespace Dwarf {
         dwarf::dwarf_finish(handle_, &err);
     }
 
-    void Debug::close() throw (Exception) {
+    void Debug::close() const throw (Exception) {
         Error err;
         if (dwarf::dwarf_finish(handle_, &err) != DW_DLV_OK)
             throw Exception(shared_from_this(), err);
@@ -78,11 +78,11 @@ namespace Dwarf {
         return *end_;
     }
 
-    Debug::operator std::shared_ptr<Debug>() {
+    Debug::operator std::shared_ptr<const Debug>() const {
         return shared_from_this();
     }
 
-    std::shared_ptr<Debug> Debug::open(const char *path) {
+    std::shared_ptr<const Debug> Debug::open(const char *path) {
         int fd = posix::open(path, O_RDONLY);
         if (fd == -1)
             return nullptr;
@@ -92,7 +92,7 @@ namespace Dwarf {
         return ref;
     }
 
-    std::shared_ptr<Debug> Debug::self() {
+    std::shared_ptr<const Debug> Debug::self() {
         return open("/proc/self/exe");
     }
 
@@ -104,6 +104,6 @@ namespace Dwarf {
             case DW_DLV_ERROR: throw Exception(shared_from_this(), err);
             default: break;
         }
-        return new Die(shared_from_this(), die);
+        return std::make_shared<Die>(shared_from_this(), die);
     }
 };
