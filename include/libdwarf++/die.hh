@@ -66,6 +66,7 @@ namespace Dwarf {
         ~Die();
 
         virtual void traverse(TraversalFunction func, void* data);
+        virtual void traverse_headless(TraversalFunction func, void* data);
         virtual std::shared_ptr<Die> sibling();
         virtual std::shared_ptr<Die> child();
 
@@ -98,6 +99,7 @@ namespace Dwarf {
     public:
         EmptyDie() : Die() {};
         inline virtual void traverse([[gnu::unused]] TraversalFunction func, [[gnu::unused]] void* data) override {}
+        inline virtual void traverse_headless([[gnu::unused]] TraversalFunction func, [[gnu::unused]] void* data) override {}
         inline virtual std::shared_ptr<Die> sibling() { return nullptr; }
         inline virtual std::shared_ptr<Die> child()   { return nullptr; }
     };

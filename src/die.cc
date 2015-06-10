@@ -32,6 +32,11 @@ namespace Dwarf {
         sibling()->traverse(func, data);
     }
 
+    void Die::traverse_headless(std::function<TraversalResult(Die&, void*)> func, void* data) {
+        child()->traverse(func, data);
+        sibling()->traverse(func, data);
+    }
+
     std::shared_ptr<Die> Die::sibling() {
         init_sibling();
         return sibling_;
@@ -97,14 +102,16 @@ namespace Dwarf {
         if (name_->str)
             return name_->str;
 
+        char* name;
         Error err;
-        switch (dwarf::dwarf_diename(die_, &name_->str, &err)) {
+        switch (dwarf::dwarf_diename(die_, &name, &err)) {
             case DW_DLV_ERROR:
                 throw Exception(dbg_, err);
             case DW_DLV_NO_ENTRY:
                 return nullptr;
             default: break;
         }
+        name_->str = name;
         return name_->str;
     }
 
