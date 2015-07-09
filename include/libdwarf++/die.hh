@@ -5,6 +5,7 @@
 # include <memory>
 # include "dwarf.hh"
 # include "tag.hh"
+# include "exprloc.hh"
 
 namespace Dwarf {
 
@@ -17,8 +18,10 @@ namespace Dwarf {
 
         template<typename T>
         T as() const {
-            Dwarf::Error err;
+            Dwarf::Error err = nullptr;
             T result = 0;
+
+            auto dbg = dbg_.lock();
 
             int callres = DW_DLV_OK;
             Dwarf::Half attrform = form();
@@ -41,8 +44,11 @@ namespace Dwarf {
                 case DW_FORM_string:    callres = dwarf::dwarf_formstring(attr_,     reinterpret_cast<char **>(&result),          &err); break;
                 case DW_FORM_flag:      callres = dwarf::dwarf_formflag(attr_,       reinterpret_cast<Dwarf::Bool*>(&result),     &err); break;
                 case DW_FORM_block:     callres = dwarf::dwarf_formblock(attr_,      reinterpret_cast<Dwarf::Block**>(&result),   &err); break;
-                case DW_FORM_exprloc:   throw std::invalid_argument("Attribute Expression evaluation not yet implemented");
+                case DW_FORM_exprloc:   callres = exprloc_eval(*dbg, attr_,          reinterpret_cast<uint64_t*>(&result),        &err); break;
                 default: break;
+            }
+            if (callres == DW_DLV_ERROR) {
+                throw new Exception(dbg_, err);
             }
             return result;
         }

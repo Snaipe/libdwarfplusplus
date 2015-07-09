@@ -38,6 +38,8 @@ namespace Dwarf {
     using Off       = dwarf::Dwarf_Off;
     using Bool      = dwarf::Dwarf_Bool;
     using Block     = dwarf::Dwarf_Block;
+    using Locdesc   = dwarf::Dwarf_Locdesc;
+    using Loc       = dwarf::Dwarf_Loc;
 };
 
 #endif /* !LIBDWARFPP_CDWARF_HH */
