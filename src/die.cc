@@ -34,7 +34,6 @@ namespace Dwarf {
 
     void Die::traverse_headless(std::function<TraversalResult(Die&, void*)> func, void* data) {
         child()->traverse(func, data);
-        sibling()->traverse(func, data);
     }
 
     std::shared_ptr<Die> Die::sibling() {
