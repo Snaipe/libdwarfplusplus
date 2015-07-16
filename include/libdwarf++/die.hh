@@ -48,7 +48,7 @@ namespace Dwarf {
                 default: break;
             }
             if (callres == DW_DLV_ERROR) {
-                throw new Exception(dbg_, err);
+                throw Exception(dbg_, err);
             }
             return result;
         }
