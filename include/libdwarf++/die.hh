@@ -24,7 +24,6 @@ namespace Dwarf {
             auto dbg = dbg_.lock();
 
             int callres = DW_DLV_OK;
-            Dwarf::Half attrform = form();
             switch (form()) {
                 case DW_FORM_data1:
                 case DW_FORM_data2:
@@ -39,7 +38,7 @@ namespace Dwarf {
                 case DW_FORM_ref4:
                 case DW_FORM_ref8:
                 case DW_FORM_ref_sig8:
-                case DW_FORM_ref_udata: callres = dwarf::dwarf_formref(attr_,        reinterpret_cast<Dwarf::Off*>(&result),      &err); break;
+                case DW_FORM_ref_udata:
                 case DW_FORM_ref_addr:  callres = dwarf::dwarf_global_formref(attr_, reinterpret_cast<Dwarf::Off*>(&result),      &err); break;
                 case DW_FORM_string:    callres = dwarf::dwarf_formstring(attr_,     reinterpret_cast<char **>(&result),          &err); break;
                 case DW_FORM_flag:      callres = dwarf::dwarf_formflag(attr_,       reinterpret_cast<Dwarf::Bool*>(&result),     &err); break;
@@ -51,6 +50,29 @@ namespace Dwarf {
                 throw Exception(dbg_, err);
             }
             return result;
+        }
+
+        inline std::shared_ptr<Die> as_die() const {
+            Dwarf::Error err = nullptr;
+            Dwarf::Off result;
+
+            auto dbg = dbg_.lock();
+            int callres;
+            switch (form()) {
+                case DW_FORM_ref1:
+                case DW_FORM_ref2:
+                case DW_FORM_ref4:
+                case DW_FORM_ref8:
+                case DW_FORM_ref_sig8:
+                case DW_FORM_ref_udata:
+                case DW_FORM_ref_addr:  callres = dwarf::dwarf_global_formref(attr_, &result, &err); break;
+                default:
+                    throw std::runtime_error("Unexpected non-reference attribute");
+            }
+
+            if (callres == DW_DLV_ERROR)
+                throw Exception(dbg_, err);
+            return dbg->offdie(result);
         }
     private:
         std::weak_ptr<const Debug> dbg_;
