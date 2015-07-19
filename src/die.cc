@@ -52,7 +52,7 @@ namespace Dwarf {
 
         std::shared_ptr<const Debug> dbg = dbg_.lock();
         if (!dbg)
-            throw new DebugClosedException();
+            throw DebugClosedException();
         Error err;
         dwarf::Dwarf_Die sibling;
         switch (dwarf::dwarf_siblingof(dbg->get_handle(), die_, &sibling, &err)) {
@@ -72,7 +72,7 @@ namespace Dwarf {
 
         std::shared_ptr<const Debug> dbg = dbg_.lock();
         if (!dbg)
-            throw new DebugClosedException();
+            throw DebugClosedException();
         Error err;
         dwarf::Dwarf_Die child;
         switch (dwarf::dwarf_child(die_, &child, &err)) {
