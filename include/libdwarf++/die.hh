@@ -42,6 +42,9 @@ namespace Dwarf {
                 case DW_FORM_ref_addr:  callres = dwarf::dwarf_global_formref(attr_, reinterpret_cast<Dwarf::Off*>(&result),      &err); break;
                 case DW_FORM_string:    callres = dwarf::dwarf_formstring(attr_,     reinterpret_cast<char **>(&result),          &err); break;
                 case DW_FORM_flag:      callres = dwarf::dwarf_formflag(attr_,       reinterpret_cast<Dwarf::Bool*>(&result),     &err); break;
+                case DW_FORM_block1:
+                case DW_FORM_block2:
+                case DW_FORM_block4:
                 case DW_FORM_block:     callres = dwarf::dwarf_formblock(attr_,      reinterpret_cast<Dwarf::Block**>(&result),   &err); break;
                 case DW_FORM_exprloc:   callres = exprloc_eval(*dbg, attr_,          reinterpret_cast<uint64_t*>(&result),        &err); break;
                 default: break;
@@ -108,6 +111,10 @@ namespace Dwarf {
         Dwarf::Off get_offset() const throw(Exception);
 
         std::unique_ptr<const Attribute> get_attribute(Dwarf::Half attr) const;
+
+        std::shared_ptr<const Debug> get_debug() const {
+            return dbg_.lock();
+        }
 
     protected:
         Die();

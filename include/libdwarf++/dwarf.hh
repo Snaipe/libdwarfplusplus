@@ -46,6 +46,7 @@ namespace Dwarf {
     template <> struct TypeKind<dwarf::Dwarf_Attribute> { enum {Kind = DW_DLA_ATTR}; };
     template <> struct TypeKind<dwarf::Dwarf_Locdesc**> { enum {Kind = DW_DLA_LOCDESC}; };
     template <> struct TypeKind<dwarf::Dwarf_Loc*>      { enum {Kind = DW_DLA_LOC}; };
+    template <> struct TypeKind<dwarf::Dwarf_Block*>    { enum {Kind = DW_DLA_BLOCK}; };
     template <> struct TypeKind<char *>                 { enum {Kind = DW_DLA_STRING}; };
 
     class CUIterator;
