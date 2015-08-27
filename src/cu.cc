@@ -17,14 +17,14 @@
  *  along with libdwarf++.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#include <libdwarf++/cu.hh>
+#include "libdwarf++/cu.hh"
 
 namespace Dwarf {
 
     // CompilationUnit
 
     CompilationUnit::CompilationUnit(std::weak_ptr<const Debug> dbg,
-            std::shared_ptr<Dwarf::Die> die,
+            std::shared_ptr<AnyDie> die,
             Unsigned header_len,
             Half version_stamp,
             Unsigned abbrev_offset,
@@ -55,8 +55,9 @@ namespace Dwarf {
         return header_ != 0;
     }
 
-    std::shared_ptr<Die> CompilationUnit::get_die() const {
-        return die_;
+    Die& CompilationUnit::get_die() const {
+        Die::visitor_to_die v;
+        return die_->apply_visitor(v);
     }
 
     // CUIterator
@@ -148,7 +149,7 @@ namespace Dwarf {
             default: break;
         }
         std::weak_ptr<const Debug> wk_dbg = dbg;
-        std::shared_ptr<Die> d = std::make_shared<Die>(wk_dbg, die);
+        std::shared_ptr<AnyDie> d = make_die(Die::get_tag_id(wk_dbg, die), wk_dbg, die);
 
         return std::make_shared<CompilationUnit>(dbg, d, header_len, version_stamp, abbrev_offset, address_size, header);
     }

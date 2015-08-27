@@ -29,7 +29,7 @@ namespace Dwarf {
     class CompilationUnit {
     public:
         CompilationUnit(std::weak_ptr<const Debug> dbg,
-                        std::shared_ptr<Dwarf::Die> die,
+                        std::shared_ptr<AnyDie> die,
                         Unsigned header_len = 0,
                         Half version_stamp = 0,
                         Unsigned abbrev_offset = 0,
@@ -39,11 +39,21 @@ namespace Dwarf {
         bool operator==(const CompilationUnit &other) const;
         bool operator!=(const CompilationUnit &other) const;
         operator bool() const;
-        std::shared_ptr<Die> get_die() const;
+        Die& get_die() const;
+
+        template <typename T>
+        void visit(T& visitor) const {
+            Die::visit_die(visitor, *die_);
+        }
+
+        template <typename T>
+        void visit_headless(T& visitor) const {
+            get_die().visit_headless(visitor);
+        }
 
     private:
         std::weak_ptr<const Debug> dbg_;
-        std::shared_ptr<Dwarf::Die> die_;
+        std::shared_ptr<Dwarf::AnyDie> die_;
         Unsigned header_len_;
         Half version_stamp_;
         Unsigned abbrev_offset_;

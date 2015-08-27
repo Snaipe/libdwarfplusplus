@@ -17,8 +17,8 @@
  *  along with libdwarf++.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#include <libdwarf++/dwarf.hh>
-#include <libdwarf++/cu.hh>
+#include "libdwarf++/dwarf.hh"
+#include "libdwarf++/cu.hh"
 
 namespace posix {
 extern "C" {

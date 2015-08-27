@@ -17,8 +17,8 @@
  *  along with libdwarf++.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#include <libdwarf++/exception.hh>
-#include <libdwarf++/dwarf.hh>
+#include "libdwarf++/exception.hh"
+#include "libdwarf++/dwarf.hh"
 #include <cstdlib>
 
 namespace Dwarf {
