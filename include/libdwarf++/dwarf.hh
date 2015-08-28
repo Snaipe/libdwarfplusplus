@@ -24,6 +24,7 @@
 # include <memory>
 # include "cdwarf"
 # include "exception.hh"
+# include "anydie.hh"
 
 namespace Dwarf {
 
@@ -82,7 +83,7 @@ namespace Dwarf {
             return handle_;
         }
 
-        std::shared_ptr<Die> offdie(Dwarf::Off offset) const;
+        std::shared_ptr<AnyDie> offdie(Dwarf::Off offset) const;
 
         static std::shared_ptr<const Debug> open(const char *path);
         static std::shared_ptr<const Debug> self();

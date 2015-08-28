@@ -148,8 +148,7 @@ namespace Dwarf {
                 throw Exception(dbg, err);
             default: break;
         }
-        std::weak_ptr<const Debug> wk_dbg = dbg;
-        std::shared_ptr<AnyDie> d = make_die(Die::get_tag_id(wk_dbg, die), wk_dbg, die);
+        std::shared_ptr<AnyDie> d = make_die(Die::get_tag_id(dbg, die), dbg, die);
 
         return std::make_shared<CompilationUnit>(dbg, d, header_len, version_stamp, abbrev_offset, address_size, header);
     }

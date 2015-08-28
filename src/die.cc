@@ -3,23 +3,31 @@
 
 namespace Dwarf {
 
+    DieData::DieData(std::weak_ptr<const Debug> dbg, dwarf::Dwarf_Die& die)
+        : dbg_(dbg)
+        , die(die)
+        , sibling()
+        , child()
+        , name(nullptr)
+        , offset(0)
+    {}
+
+    DieData::~DieData() {
+        std::shared_ptr<const Debug> dbg = dbg_.lock();
+        if (dbg) {
+            if (die) dbg->dealloc(die);
+            if (name) dbg->dealloc(name);
+        }
+    }
+
     Die::Die(std::weak_ptr<const Debug> dbg, dwarf::Dwarf_Die& die)
         : dbg_(dbg)
-        , die_(die)
-        , sibling_()
-        , child_()
-        , name_(new Dwarf::string(dbg))
-        , offset_(new unsigned long long int())
+        , data_(new DieData(dbg, die))
     {}
 
     Die::Die() {}
 
-    Die::~Die() {
-        std::shared_ptr<const Debug> dbg = dbg_.lock();
-        if (dbg) {
-            dbg->dealloc(die_);
-        }
-    }
+    Die::~Die() {}
 
     void Die::traverse(std::function<TraversalResult(Die&, void*)> func, void* data) {
         switch (func(*this, data)) {
@@ -40,17 +48,17 @@ namespace Dwarf {
     Die& Die::sibling() {
         init_sibling();
         Die::visitor_to_die visitor;
-        return sibling_->apply_visitor(visitor);
+        return data_->sibling->apply_visitor(visitor);
     }
 
     Die& Die::child() {
         init_child();
         Die::visitor_to_die visitor;
-        return child_->apply_visitor(visitor);
+        return data_->child->apply_visitor(visitor);
     }
 
     void Die::init_sibling() {
-        if (sibling_)
+        if (data_->sibling)
             return;
 
         std::shared_ptr<const Debug> dbg = dbg_.lock();
@@ -58,19 +66,19 @@ namespace Dwarf {
             throw DebugClosedException();
         Error err;
         dwarf::Dwarf_Die sibling = nullptr;
-        switch (dwarf::dwarf_siblingof(dbg->get_handle(), die_, &sibling, &err)) {
+        switch (dwarf::dwarf_siblingof(dbg->get_handle(), data_->die, &sibling, &err)) {
             case DW_DLV_NO_ENTRY:
-                sibling_ = std::make_shared<AnyDie>(EmptyDie());
+                data_->sibling = std::make_shared<AnyDie>(EmptyDie());
                 return;
             case DW_DLV_ERROR:
                 throw Exception(dbg, err);
             default: break;
         }
-        sibling_ = Dwarf::make_die(get_tag_id(dbg_, sibling), dbg_, sibling);
+        data_->sibling = Dwarf::make_die(get_tag_id(dbg_, sibling), dbg_, sibling);
     }
 
     void Die::init_child() {
-        if (child_)
+        if (data_->child)
             return;
 
         std::shared_ptr<const Debug> dbg = dbg_.lock();
@@ -78,21 +86,21 @@ namespace Dwarf {
             throw DebugClosedException();
         Error err;
         dwarf::Dwarf_Die child;
-        switch (dwarf::dwarf_child(die_, &child, &err)) {
+        switch (dwarf::dwarf_child(data_->die, &child, &err)) {
             case DW_DLV_NO_ENTRY:
-                child_ = std::make_shared<AnyDie>(EmptyDie());
+                data_->child = std::make_shared<AnyDie>(EmptyDie());
                 return;
             case DW_DLV_ERROR:
                 throw Exception(dbg, err);
             default: break;
         }
-        child_ = Dwarf::make_die(get_tag_id(dbg_, child), dbg_, child);
+        data_->child = Dwarf::make_die(get_tag_id(dbg_, child), dbg_, child);
     }
 
     const Tag Die::get_tag() const throw(Exception) {
         Error err;
         Half tag;
-        switch (dwarf::dwarf_tag(die_, &tag, &err)) {
+        switch (dwarf::dwarf_tag(data_->die, &tag, &err)) {
             case DW_DLV_ERROR:
                 throw Exception(dbg_, err);
             default: break;
@@ -101,39 +109,39 @@ namespace Dwarf {
     }
 
     const char* Die::get_name() const throw(Exception) {
-        if (name_->str)
-            return name_->str;
+        if (data_->name)
+            return data_->name;
 
         char* name;
         Error err;
-        switch (dwarf::dwarf_diename(die_, &name, &err)) {
+        switch (dwarf::dwarf_diename(data_->die, &name, &err)) {
             case DW_DLV_ERROR:
                 throw Exception(dbg_, err);
             case DW_DLV_NO_ENTRY:
                 return nullptr;
             default: break;
         }
-        name_->str = name;
-        return name_->str;
+        data_->name = name;
+        return name;
     }
 
     Dwarf::Off Die::get_offset() const throw(Exception) {
-        if (*offset_ > 0)
-            return *offset_;
+        if (data_->offset > 0)
+            return data_->offset;
 
         Error err;
-        switch (dwarf::dwarf_dieoffset(die_, &*offset_, &err)) {
+        switch (dwarf::dwarf_dieoffset(data_->die, &data_->offset, &err)) {
             case DW_DLV_ERROR:
                 throw Exception(dbg_, err);
             default: break;
         }
-        return *offset_;
+        return data_->offset;
     }
 
     std::unique_ptr<const Attribute> Die::get_attribute(Dwarf::Half attr) const {
         Dwarf::Error err;
         dwarf::Dwarf_Attribute result;
-        switch (dwarf::dwarf_attr(die_, attr, &result, &err)) {
+        switch (dwarf::dwarf_attr(data_->die, attr, &result, &err)) {
             case DW_DLV_NO_ENTRY: return nullptr;
             case DW_DLV_ERROR: throw Exception(dbg_, err);
             default: break;

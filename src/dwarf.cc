@@ -104,7 +104,7 @@ namespace Dwarf {
         return open("/proc/self/exe");
     }
 
-    std::shared_ptr<Die> Debug::offdie(Dwarf::Off offset) const {
+    std::shared_ptr<AnyDie> Debug::offdie(Dwarf::Off offset) const {
         dwarf::Dwarf_Die die;
         Dwarf::Error err;
         switch (dwarf::dwarf_offdie(handle_, offset, &die, &err)) {
@@ -112,6 +112,8 @@ namespace Dwarf {
             case DW_DLV_ERROR: throw Exception(shared_from_this(), err);
             default: break;
         }
-        return std::make_shared<Die>(shared_from_this(), die);
+        std::shared_ptr<const Debug> dbg = shared_from_this();
+        return make_die(Die::get_tag_id(dbg, die), dbg, die);
     }
+
 };

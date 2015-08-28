@@ -21,6 +21,7 @@ EXTRA_DIST = LICENSE
 subdirincludedir = $(includedir)/libdwarf++/
 subdirinclude_HEADERS = \
     include/libdwarf++/xvector.hh \
+    include/libdwarf++/anydie.hh \
     include/libdwarf++/die.hh \
     include/libdwarf++/exception.hh \
     include/libdwarf++/cu.hh \
